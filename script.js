@@ -32,10 +32,11 @@ let loadContent = 0;
 let limit = 20;
 let offset = 0;
 let start = 0;
-
+let loaded = true;
 
 
 async function loadPokemon() {
+    loaded = false;
     let url = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`;
     let response = await fetch(url);
     let pagination = await response.json();
@@ -43,11 +44,12 @@ async function loadPokemon() {
     console.log(pokemonArray);
     renderPokemonInfo(pagination);
     loadAllPokeDataForSearchbar(pagination);
+    loaded = true;
 };
 
 async function renderPokemonInfo(pagination) {
 
-    for (let loadcontent = 1; loadcontent < limit + 1; loadcontent++) {
+    for (let loadcontent = 1; loadcontent < limit + offset + 1; loadcontent++) {
         let url2 = `https://pokeapi.co/api/v2/pokemon-species/${loadcontent}/`;
         let response2 = await fetch(url2);
         let pokemon2 = await response2.json();
@@ -57,7 +59,7 @@ async function renderPokemonInfo(pagination) {
 
 
     for (let i = start; i < limit; i++) {
-
+    
         let url = pagination["results"][i]["url"];
         let response = await fetch(url);
         let pokemon = await response.json();
@@ -65,6 +67,7 @@ async function renderPokemonInfo(pagination) {
         
 
         let type = pokemon["types"];
+
 
         document.getElementById('pokedex').innerHTML +=
             `
@@ -94,10 +97,11 @@ async function renderPokemonInfo(pagination) {
 
 window.onscroll = function (){
     if(window.scrollY + window.innerHeight >= document.body.clientHeight){
-        loadContent += 20;
+        
+        limit +=20;
+        
         start += 20;
-        limit += 20;
-        offset += 20;
+       
 
         console.log(loadContent);
         console.log(start);
