@@ -28,11 +28,15 @@ let pokemonArray = [];
 let pokemonSpecies = [];
 let pokeData = [];
 let pokeData2 = [];
+let loadContent = 0;
+let limit = 20;
+let offset = 0;
+let start = 0;
 
 
 
 async function loadPokemon() {
-    let url = `https://pokeapi.co/api/v2/pokemon?limit=50&offset=0`;
+    let url = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`;
     let response = await fetch(url);
     let pagination = await response.json();
     pokemonArray.push(pagination);
@@ -43,8 +47,8 @@ async function loadPokemon() {
 
 async function renderPokemonInfo(pagination) {
 
-    for (let j = 1; j < pagination["results"].length + 1; j++) {
-        let url2 = `https://pokeapi.co/api/v2/pokemon-species/${j}/`;
+    for (let loadcontent = 1; loadcontent < limit + 1; loadcontent++) {
+        let url2 = `https://pokeapi.co/api/v2/pokemon-species/${loadcontent}/`;
         let response2 = await fetch(url2);
         let pokemon2 = await response2.json();
         pokemonSpecies.push(pokemon2);
@@ -52,7 +56,7 @@ async function renderPokemonInfo(pagination) {
     console.log(pokemonSpecies);
 
 
-    for (let i = 0; i < pagination["results"].length; i++) {
+    for (let i = start; i < limit; i++) {
 
         let url = pagination["results"][i]["url"];
         let response = await fetch(url);
@@ -86,6 +90,21 @@ async function renderPokemonInfo(pagination) {
         }
         checkForPokeType(i);
     }console.log(allPokemon);
+}
+
+window.onscroll = function (){
+    if(window.scrollY + window.innerHeight >= document.body.clientHeight){
+        loadContent += 20;
+        start += 20;
+        limit += 20;
+        offset += 20;
+
+        console.log(loadContent);
+        console.log(start);
+        console.log(limit);
+        console.log(offset);
+        loadPokemon();
+    }
 }
 
 async function loadAllPokeDataForSearchbar(pagination) {
