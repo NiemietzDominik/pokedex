@@ -37,9 +37,10 @@ let loaded = true;
 
 async function loadPokemon() {
     loaded = false;
+    console.log('limit:',limit,'offset:',offset);
     let url = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`;
     let response = await fetch(url);
-    let pagination = await response.json();
+    pagination = await response.json();
     pokemonArray.push(pagination);
     console.log(pokemonArray);
     renderPokemonInfo(pagination);
@@ -49,64 +50,63 @@ async function loadPokemon() {
 
 async function renderPokemonInfo(pagination) {
 
-    for (let loadcontent = 1; loadcontent < limit + offset + 1; loadcontent++) {
+    for (let loadcontent = offset + 1; loadcontent < limit + offset + 1; loadcontent++) {
         let url2 = `https://pokeapi.co/api/v2/pokemon-species/${loadcontent}/`;
         let response2 = await fetch(url2);
         let pokemon2 = await response2.json();
         pokemonSpecies.push(pokemon2);
     }
-    console.log(pokemonSpecies);
+    //console.log(pokemonSpecies);
 
-
-    for (let i = start; i < limit; i++) {
-    
+    console.log(pagination["results"]);
+    for (let i = 0 ; i < 20; i++) {
+        console.log('start:',start,'i:',i);
+        
         let url = pagination["results"][i]["url"];
         let response = await fetch(url);
         let pokemon = await response.json();
         allPokemon.push(pokemon);
-        
+    
 
         let type = pokemon["types"];
 
 
         document.getElementById('pokedex').innerHTML +=
             `
-            <div id="close${i}" class="d-none"><button class="closeBtn" onClick="closePokedex(${i})">close</button></div>
+            <div id="close${i + offset}" class="d-none"><button class="closeBtn" onClick="closePokedex(${i + offset})">close</button></div>
             
-            <div id="pokedexSmall${i}" onclick="openPokedex(${pokemon, i})" class="pokedexSmall">
+            <div id="pokedexSmall${i + offset}" onclick="openPokedex(${pokemon, i + offset})" class="pokedexSmall">
         
                 <div id="pokeId" class="pokeId">Nr. ${pokemon["id"]}</div>
 
-                <div id="pagination${i}" class="pagination">
+                <div id="pagination${i + offset}" class="pagination">
                 ${pagination[`results`][i]["name"]}
 
-                <div id="typContainer${i}" class="typeContainer"></div>
+                <div id="typContainer${i + offset}" class="typeContainer"></div>
                
                 </div>
-                    <div class"pokeSprite"><img id="pokeImg${i}" class="imgSize" src="${pokemon["sprites"]["other"]["dream_world"]["front_default"]}">
+                    <div class"pokeSprite"><img id="pokeImg${i + offset}" class="imgSize" src="${pokemon["sprites"]["other"]["dream_world"]["front_default"]}">
                     </div>
                 </div>
             </div>
             `
         for (let j = 0; j < type.length; j++) {
-            document.getElementById(`typContainer${i}`).innerHTML += `<span class="type">${pokemon["types"][j]["type"]["name"]}</span>`
+            document.getElementById(`typContainer${i + offset}`).innerHTML += `<span class="type">${pokemon["types"][j]["type"]["name"]}</span>`
         }
-        checkForPokeType(i);
-    }console.log(allPokemon);
+        checkForPokeType(i + offset);
+    }
 }
 
 window.onscroll = function (){
     if(window.scrollY + window.innerHeight >= document.body.clientHeight){
         
-        limit +=20;
-        
-        start += 20;
+        offset +=20;
+        start +=20;
        
-
-        console.log(loadContent);
-        console.log(start);
-        console.log(limit);
-        console.log(offset);
+        //console.log(loadContent);
+        //console.log(start);
+        //console.log(limit);
+        //console.log(offset);
         loadPokemon();
     }
 }
@@ -119,7 +119,7 @@ async function loadAllPokeDataForSearchbar(pagination) {
 async function loadInfoSource1() {
     let url = `https://pokeapi.co/api/v2/pokemon?limit=151&offset=0`;
     let response = await fetch(url);
-    let pagination = await response.json();
+    pagination = await response.json();
     for (let i = 0; i < pagination["results"].length; i++) {
         let url = pagination["results"][i]["url"];
         let response = await fetch(url);
@@ -127,8 +127,8 @@ async function loadInfoSource1() {
         pokeData.push(pokemon);
     }
 }
-async function loadInfoSource2(pagination) {
-    for (let j = 1; j < pagination["results"].length + 1; j++) {
+async function loadInfoSource2() {
+    for (let j = 1; j < pagination["results"].length; j++) {
         let url2 = `https://pokeapi.co/api/v2/pokemon-species/${j}/`;
         let response2 = await fetch(url2);
         let pokemon2 = await response2.json();
@@ -137,6 +137,7 @@ async function loadInfoSource2(pagination) {
 };
 
 function checkForPokeType(i) {
+    console.log(pokemonSpecies);
     let poketype = `${pokemonSpecies[i]['color']['name']}`;
     document.getElementById(`pokedexSmall${i}`).style.backgroundColor = poketype;
 }
@@ -175,6 +176,8 @@ function addOpenPokedexStyle(i) {
 
 function closePokedex(i) {
     document.getElementById(`headerInfoId`).innerHTML = ``;
+
+    document.getElementById(`pokeImg${i}`).src = pokeData[i]["sprites"]["other"]["dream_world"]["front_default"];
 
     document.getElementById(`openPokedexData`).classList.remove(`openPokedexData`);
     document.getElementById(`openPokedexData`).classList.add(`d-none`);
@@ -397,6 +400,5 @@ function loadMovesContainer(i) {
         `
     };
 }
-
 
 
